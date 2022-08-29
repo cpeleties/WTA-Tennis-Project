@@ -1,17 +1,13 @@
 /* WTA Data from 2011-2022 */
 select *
 from PortfoiloProject..WTAdata
-where winner_name='Elena Rybakina' and loser_name='Ons Jabeur'
-order by 1 desc
 
 -- Wimbledon Career Stats by Player (Temp Table)
 if OBJECT_ID('WimbledonCareers','U') Is not null 
 Drop Table WimbledonCareers
 
 Create Table WimbledonCareers
-( 
-Date date, player nvarchar(255), opponent nvarchar(255), minutes numeric, breakpoints numeric,breakpointwins numeric,doublefaults numeric, aces numeric, winloss nvarchar(255) 
-)
+(Date date, player nvarchar(255), opponent nvarchar(255), minutes numeric, breakpoints numeric,breakpointwins numeric,doublefaults numeric, aces numeric, winloss nvarchar(255))
 
 Insert into WimbledonCareers
 select tourney_date,winner_name as player,loser_name as opponent,minutes, l_bpFaced as breakpoints, (l_bpFaced-l_bpSaved) as breakpointwins, w_df as doublefaults, w_ace as aces,
@@ -52,9 +48,7 @@ if OBJECT_ID('CareerRank','U') Is not null
 Drop Table CareerRank
 
 Create Table CareerRank
-( 
-Date date, player nvarchar(255), tourney_name nvarchar(255), wta_rank numeric 
-)
+(Date date, player nvarchar(255), tourney_name nvarchar(255), wta_rank numeric)
 
 Insert into CareerRank
 select tourney_date, winner_name as player, tourney_name, winner_rank as wta_rank
@@ -78,21 +72,23 @@ and tourney_name='Wimbledon'
 and ((winner_name='Elena Rybakina' or winner_name='Ons Jabeur') or (loser_name='Elena Rybakina' or loser_name='Ons Jabeur'))
 order by 1
 
-
 --Success Map
 --Matches won in different locations
---
+
+--List of locations played at by the players
 Select tourney_name
 from PortfoiloProject..WTAdata
 where (tourney_name Not like 'Fed Cup%' and tourney_name not like 'BJK Cup%' and tourney_name!='Olympics') and (winner_name='Elena Rybakina' or winner_name='Ons Jabeur')
 group by tourney_name
 
+--List of tournaments with varying locations based on year
 Select tourney_name, year(tourney_date) as year
 from PortfoiloProject..WTAdata
 where (tourney_name like 'Fed Cup%' or tourney_name like 'BJK Cup%' or tourney_name='Olympics') and (winner_name='Elena Rybakina' or winner_name='Ons Jabeur')
 group by tourney_name, year(tourney_date)
 order by 2
 
+--Join with seperate list to assign countries to each match played, grouped to find number of wins in each country
 Select country, count(Country) as Wins, winner_name
 from PortfoiloProject..WTAdata a
 join PortfoiloProject..locationdata b
